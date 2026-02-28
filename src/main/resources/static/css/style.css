@@ -1,0 +1,192 @@
+/* ===========================
+   Smart Expense Tracker CSS
+   =========================== */
+
+:root {
+    --sidebar-width: 250px;
+    --sidebar-collapsed-width: 0px;
+    --transition-speed: 0.3s;
+}
+
+/* Auth Pages */
+.auth-body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+}
+
+.auth-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* Layout */
+#wrapper {
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+    width: var(--sidebar-width);
+    min-height: 100vh;
+    min-width: var(--sidebar-width);
+    transition: width var(--transition-speed), min-width var(--transition-speed);
+    overflow: hidden;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.sidebar.collapsed {
+    width: 0;
+    min-width: 0;
+}
+
+.sidebar-nav .nav-link {
+    transition: background-color 0.15s ease;
+    font-size: 0.9rem;
+}
+
+.sidebar-nav .nav-link:hover,
+.sidebar-nav .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff !important;
+}
+
+.sidebar-nav .nav-link.active {
+    background-color: rgba(25, 135, 84, 0.3) !important;
+    border-left: 3px solid #198754;
+}
+
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* Main content */
+#main-content {
+    min-width: 0;
+    transition: all var(--transition-speed);
+}
+
+/* Stat icon */
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Transaction dot */
+.txn-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+}
+
+/* Cards */
+.card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+    transform: translateY(-1px);
+}
+
+/* Transaction Type Radio Buttons */
+.type-check .form-check-input {
+    display: none;
+}
+
+.type-label {
+    cursor: pointer;
+    padding: 0.5rem 1.5rem;
+    border: 2px solid #dee2e6;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    display: inline-block;
+    user-select: none;
+}
+
+.type-check input[value="INCOME"]:checked + .income-label {
+    border-color: #198754;
+    background-color: #d1e7dd;
+    color: #0a3622;
+}
+
+.type-check input[value="EXPENSE"]:checked + .expense-label {
+    border-color: #dc3545;
+    background-color: #f8d7da;
+    color: #58151c;
+}
+
+.type-label:hover {
+    border-color: #6c757d;
+    background-color: #f8f9fa;
+}
+
+/* Table */
+.table thead th {
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        z-index: 1000;
+        width: 0;
+        min-width: 0;
+        left: 0;
+        top: 0;
+    }
+
+    .sidebar.mobile-open {
+        width: var(--sidebar-width);
+        min-width: var(--sidebar-width);
+    }
+
+    #main-content {
+        width: 100%;
+    }
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Alert animations */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}

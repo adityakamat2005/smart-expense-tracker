@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Smart Expense Tracker</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-light">
+
+<div class="d-flex" id="wrapper">
+
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <!-- Main Content -->
+    <div id="main-content" class="flex-grow-1 d-flex flex-column">
+
+        <!-- Navbar -->
+        <div th:replace="~{fragments/navbar :: navbar(pageTitle='Dashboard')}"></div>
+
+        <!-- Flash Messages -->
+        <div class="container-fluid px-4 pt-3">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+
+        <!-- Page Body -->
+        <div class="container-fluid px-4 py-3 flex-grow-1">
+
+            <!-- Greeting + Filter Row -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bi bi-sun text-warning me-2"></i>
+                        Welcome back, <span class="text-success" th:text="${dashboard.username}">User</span>!
+                    </h4>
+                    <p class="text-muted mb-0 small">Here's your financial overview</p>
+                </div>
+
+                <!-- Month/Year Filter -->
+                <form th:action="@{/dashboard}" method="get" class="d-flex align-items-center gap-2">
+                    <select name="month" class="form-select form-select-sm" style="width:130px;">
+                        <option th:each="m : ${#numbers.sequence(1, 12)}"
+                                th:value="${m}"
+                                th:selected="${m == dashboard.selectedMonth}"
+                                th:text="${#dates.format(#dates.create(2024, m, 1), 'MMMM')}">
+                        </option>
+                    </select>
+                    <select name="year" class="form-select form-select-sm" style="width:95px;">
+                        <option th:each="y : ${#numbers.sequence(currentYear - 3, currentYear)}"
+                                th:value="${y}"
+                                th:selected="${y == dashboard.selectedYear}"
+                                th:text="${y}">
+                        </option>
+                    </select>
+                    <button type="submit" class="btn btn-success btn-sm px-3">
+                        <i class="bi bi-funnel me-1"></i>Filter
+                    </button>
+                </form>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-xl-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body d-flex align-items-center gap-3 p-3">
+                            <div class="stat-icon bg-success-subtle text-success rounded-3 p-3">
+                                <i class="bi bi-arrow-down-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">Total Income</div>
+                                <div class="fw-bold fs-5 text-success"
+                                     th:text="'₹' + ${#numbers.formatDecimal(dashboard.totalIncome, 0, 'COMMA', 2, 'POINT')}">₹0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body d-flex align-items-center gap-3 p-3">
+                            <div class="stat-icon bg-danger-subtle text-danger rounded-3 p-3">
+                                <i class="bi bi-arrow-up-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">Total Expense</div>
+                                <div class="fw-bold fs-5 text-danger"
+                                     th:text="'₹' + ${#numbers.formatDecimal(dashboard.totalExpense, 0, 'COMMA', 2, 'POINT')}">₹0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-4">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body d-flex align-items-center gap-3 p-3">
+                            <div th:class="'stat-icon rounded-3 p-3 ' + (${dashboard.netBalance >= 0} ? 'bg-primary-subtle text-primary' : 'bg-warning-subtle text-warning')">
+                                <i class="bi bi-wallet2 fs-3"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">Net Balance</div>
+                                <div th:class="'fw-bold fs-5 ' + (${dashboard.netBalance >= 0} ? 'text-primary' : 'text-warning')"
+                                     th:text="'₹' + ${#numbers.formatDecimal(dashboard.netBalance, 0, 'COMMA', 2, 'POINT')}">₹0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart + Recent Transactions -->
+            <div class="row g-3 mb-4">
+
+                <!-- Chart Card -->
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-header bg-white border-0 pt-3 pb-0 px-3">
+                            <h6 class="fw-semibold mb-0"><i class="bi bi-bar-chart-fill text-success me-2"></i>Income vs Expense</h6>
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center p-3">
+                            <div style="position: relative; width: 100%; max-width: 280px;">
+                                <canvas id="incomeExpenseChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-header bg-white border-0 pt-3 pb-0 px-3 d-flex justify-content-between align-items-center">
+                            <h6 class="fw-semibold mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Recent Transactions</h6>
+                            <div class="d-flex gap-2">
+                                <a th:href="@{/transactions}" class="btn btn-sm btn-outline-primary rounded-pill">View All</a>
+                                <a th:href="@{/export/transactions/excel(month=${dashboard.selectedMonth},year=${dashboard.selectedYear})}"
+                                   class="btn btn-sm btn-success rounded-pill">
+                                    <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div th:if="${#lists.isEmpty(dashboard.recentTransactions)}" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-1 d-block mb-2 text-muted opacity-50"></i>
+                                No transactions found for this period.
+                                <br>
+                                <a th:href="@{/transactions/add}" class="btn btn-sm btn-success mt-3">
+                                    <i class="bi bi-plus me-1"></i>Add First Transaction
+                                </a>
+                            </div>
+                            <div th:unless="${#lists.isEmpty(dashboard.recentTransactions)}" class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th class="small fw-semibold px-3">Description</th>
+                                        <th class="small fw-semibold">Category</th>
+                                        <th class="small fw-semibold">Date</th>
+                                        <th class="small fw-semibold text-end pe-3">Amount</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="t : ${dashboard.recentTransactions}">
+                                        <td class="px-3 py-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div th:class="'txn-dot rounded-circle ' + (${t.type.name() == 'INCOME'} ? 'bg-success' : 'bg-danger')"></div>
+                                                <span class="small" th:text="${t.description}"></span>
+                                            </div>
+                                        </td>
+                                        <td class="py-2">
+                                            <span class="badge bg-light text-dark border small" th:text="${t.category.name}"></span>
+                                        </td>
+                                        <td class="py-2 small text-muted" th:text="${#temporals.format(t.date, 'dd MMM')}"></td>
+                                        <td class="py-2 text-end pe-3">
+                                            <span th:class="'fw-semibold small ' + (${t.type.name() == 'INCOME'} ? 'text-success' : 'text-danger')"
+                                                  th:text="(${t.type.name() == 'INCOME'} ? '+' : '-') + '₹' + ${#numbers.formatDecimal(t.amount, 0, 'COMMA', 2, 'POINT')}">
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-white border-top text-center text-muted small py-2 px-4">
+            &copy; 2024 Smart Expense Tracker
+        </footer>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script th:src="@{/js/app.js}"></script>
+<script th:inline="javascript">
+    const income = /*[[${dashboard.totalIncome}]]*/ 0;
+    const expense = /*[[${dashboard.totalExpense}]]*/ 0;
+
+    const ctx = document.getElementById('incomeExpenseChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Income', 'Expense'],
+            datasets: [{
+                data: [parseFloat(income), parseFloat(expense)],
+                backgroundColor: ['#198754', '#dc3545'],
+                borderWidth: 0,
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ' ₹' + parseFloat(ctx.raw).toLocaleString('en-IN', {minimumFractionDigits: 2})
+                    }
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

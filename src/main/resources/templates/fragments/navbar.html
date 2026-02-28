@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<div th:fragment="navbar(pageTitle)">
+    <nav class="navbar navbar-light bg-white border-bottom px-3 sticky-top">
+        <button class="btn btn-sm btn-outline-secondary" id="sidebarToggle">
+            <i class="bi bi-list fs-5"></i>
+        </button>
+        <span class="navbar-brand mb-0 fs-6 fw-semibold ms-2" th:text="${pageTitle}">Page</span>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span class="text-muted small d-none d-md-block">
+                <i class="bi bi-person-circle me-1"></i>
+                <span sec:authentication="name">User</span>
+            </span>
+        </div>
+    </nav>
+</div>
+</body>
+</html>
