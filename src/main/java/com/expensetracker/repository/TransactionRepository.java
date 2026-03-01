@@ -14,22 +14,25 @@ import java.util.Optional;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    List<Transaction> findByUserOrderByDateDesc(User user);
+    // FIXED: JOIN FETCH eagerly loads category to prevent LazyInitializationException
+    @Query("SELECT t FROM Transaction t JOIN FETCH t.category WHERE t.user = :user ORDER BY t.date DESC")
+    List<Transaction> findByUserOrderByDateDesc(@Param("user") User user);
 
-    @Query("SELECT t FROM Transaction t WHERE t.user = :user " +
-           "AND MONTH(t.date) = :month AND YEAR(t.date) = :year ORDER BY t.date DESC")
+    // FIXED: JOIN FETCH for month/year filter
+    @Query("SELECT t FROM Transaction t JOIN FETCH t.category WHERE t.user = :user " +
+            "AND MONTH(t.date) = :month AND YEAR(t.date) = :year ORDER BY t.date DESC")
     List<Transaction> findByUserAndMonthAndYear(@Param("user") User user,
                                                 @Param("month") int month,
                                                 @Param("year") int year);
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.user = :user " +
-           "AND t.type = 'INCOME' AND MONTH(t.date) = :month AND YEAR(t.date) = :year")
+            "AND t.type = 'INCOME' AND MONTH(t.date) = :month AND YEAR(t.date) = :year")
     BigDecimal sumIncomeByUserAndMonthAndYear(@Param("user") User user,
                                               @Param("month") int month,
                                               @Param("year") int year);
 
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.user = :user " +
-           "AND t.type = 'EXPENSE' AND MONTH(t.date) = :month AND YEAR(t.date) = :year")
+            "AND t.type = 'EXPENSE' AND MONTH(t.date) = :month AND YEAR(t.date) = :year")
     BigDecimal sumExpenseByUserAndMonthAndYear(@Param("user") User user,
                                                @Param("month") int month,
                                                @Param("year") int year);
@@ -42,6 +45,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     Optional<Transaction> findByIdAndUser(Long id, User user);
 
-    @Query("SELECT t FROM Transaction t WHERE t.user = :user ORDER BY t.date DESC LIMIT 5")
+    // FIXED: JOIN FETCH for top 5 recent transactions on dashboard
+    @Query("SELECT t FROM Transaction t JOIN FETCH t.category WHERE t.user = :user ORDER BY t.date DESC LIMIT 5")
     List<Transaction> findTop5ByUserOrderByDateDesc(@Param("user") User user);
 }
